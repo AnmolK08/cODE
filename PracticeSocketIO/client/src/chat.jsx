@@ -27,7 +27,7 @@ export default function chat() {
     }, []);
 
     const sendMessage = () => {
-        socket.emit('message', message);
+        socket.emit('message', {"message" : message, "recieverID" : "hddwHid2m9eci2WsAAAC"});
         setMsgArray((prev) => [...prev, message]);
         console.log(message);
         setMessage('');

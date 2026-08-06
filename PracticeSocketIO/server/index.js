@@ -15,14 +15,48 @@ const io = new Server(httpServer, {
 
 const PORT = 3000;
 
-io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.id}`);
-    io.emit("message", "hello from server ");
+//normal message send 
+// io.on("connection", (socket) => {
+//     console.log(`User connected: ${socket.id}`);
+//     io.emit("message", "hello from server ");
 
-    socket.on("message", (data) => {
-        socket.emit("message", `lucy : ${data}`);
+//     socket.on("message", (data) => {
+//         socket.emit("message", `lucy : ${data}`);
+//     });
+
+// });
+
+
+const activeUsers = new Map();
+
+export function getRecieverSocketId(userId) {
+  return activeUsers.get(userId);
+}
+
+io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+    
+    const userId = socket.handshake.query.userId;
+    if (userId) {
+        activeUsers.set(userId, socket.id);
+    }
+
+    socket.on("message",(data) => {
+        console.log(data);
+
+        const receiverSocketId =getRecieverSocketId(data.recieverID);
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("message", `${data.senderID} : ${data.message}`);
+        }
+    })
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+        if (userId) {
+            activeUsers.delete(userId);
+        }
     });
-
 });
 
 
